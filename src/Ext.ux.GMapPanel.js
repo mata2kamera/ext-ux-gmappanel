@@ -78,6 +78,7 @@ Ext.ux.GMapPanel = Ext.extend(Ext.Panel, {
     onMapReady : function(){
         
         this.addMarkers(this.markers);
+        this.addKMLOverlay(this.autoLoadKML);
         
     },
     // private
@@ -223,6 +224,18 @@ Ext.ux.GMapPanel = Ext.extend(Ext.Panel, {
         if (typeof mcf === 'function') {
             this.getMap()[mc]();
         }    
+        
+    },
+    /**
+     * Loads a KML file into the map.
+     * @param {String} a string URL to the KML file.
+     */
+    addKMLOverlay : function(kmlfile){
+        
+        if (typeof kmlfile === 'string' && kmlfile !== '') {
+            var geoXml = new GGeoXml(kmlfile);
+            this.getMap().addOverlay(geoXml);
+        }
         
     },
     /**
