@@ -332,10 +332,6 @@ Ext.ux.GMapPanel = Ext.extend(Ext.Panel, {
         
     },
     // private
-    getMarkerFromGeo : function(addr){
-        
-    },
-    // private
     geoErrorMsg : function(title,msg){
         if (this.displayGeoErrors) {
             Ext.MessageBox.alert(title,msg);
