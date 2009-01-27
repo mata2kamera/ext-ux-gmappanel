@@ -31,8 +31,9 @@ Ext.onReady(function(){
                         marker: {title: 'Fenway Park'}
                     },
                     markers: [{
-                        lat: 42.339641,
-                        lng: -71.094224,
+                        //lat: 42.339641,
+                        //lng: -71.094224,
+                        geoCodeAddr: '465 Huntington Avenue, Boston, MA, 02215-5597, USA',
                         marker: {title: 'Boston Museum of Fine Arts'},
                         listeners: {
                             click: function(e){
