@@ -47,6 +47,10 @@ Ext.ux.GMapPanel = Ext.extend(Ext.Panel, {
      * True to display geocoding errors to the end user via a message box.
      */
     /**
+     * @cfg {Boolean} minGeoAccuracy
+     * The level (between 1 & 8) to display an accuracy error below. Defaults to seven (7).
+     */
+    /**
      * @cfg {Array} mapConfOpts
      * Array of strings representing configuration methods to call, a full list can be found here: http://code.google.com/apis/maps/documentation/reference.html#GMap2
      */
@@ -64,7 +68,8 @@ Ext.ux.GMapPanel = Ext.extend(Ext.Panel, {
             pitch: 0,
             gmapType: 'map',
             border: false,
-            displayGeoErrors: false
+            displayGeoErrors: false,
+			minGeoAccuracy: 7
         };
         
         Ext.applyIf(this,defConfig);
@@ -312,7 +317,7 @@ Ext.ux.GMapPanel = Ext.extend(Ext.Panel, {
             if (accuracy === 0) {
                 this.geoErrorMsg('Unable to Locate Address', 'Unable to Locate the Address you provided');
             }else{
-                if (accuracy < 7) {
+                if (accuracy < this.minGeoAccuracy) {
                     this.geoErrorMsg('Address Accuracy', 'The address provided has a low accuracy.<br><br>Level '+accuracy+' Accuracy (8 = Exact Match, 1 = Vague Match)');
                 }else{
                     point = new GLatLng(place.Point.coordinates[1], place.Point.coordinates[0]);
