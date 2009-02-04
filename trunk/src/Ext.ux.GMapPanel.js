@@ -317,7 +317,7 @@ Ext.ux.GMapPanel = Ext.extend(Ext.Panel, {
                 }else{
                     point = new GLatLng(place.Point.coordinates[1], place.Point.coordinates[0]);
                     if (center){
-                        this.getMap().setCenter(point);
+                        this.getMap().setCenter(point, this.zoomLevel);
                     }
                     if (typeof marker === 'object') {
                         if (!marker.title){
