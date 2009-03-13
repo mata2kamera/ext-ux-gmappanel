@@ -33,19 +33,19 @@ Ext.onReady(function(){
 					buttons: [{
 						text: 'Museum of Fine Arts',
 						handler: function(){
-							Ext.getCmp('my_map').geoCodeLookup('465 Huntington Avenue, Boston, MA, 02215-5597, USA', null, false, true, null);
+							Ext.getCmp('my_map').geoCodeLookup('465 Huntington Avenue, Boston, MA, 02215-5597, USA', undefined, false, true, undefined);
 						}
 					},{
 						text: 'Fenway Park',
 						handler: function(){
-							Ext.getCmp('my_map').geoCodeLookup('4 Yawkey Way, Boston, MA, 02215-3409, USA', null, false, true, null);
+							Ext.getCmp('my_map').geoCodeLookup('4 Yawkey Way, Boston, MA, 02215-3409, USA', undefined, false, true, undefined);
 						}
 					},{
 						text: 'Zoom Fenway Park',
 						handler: function(){
 							// this way will apply the zoom level to every map move
 							Ext.getCmp('my_map').zoomLevel = 19;
-							Ext.getCmp('my_map').geoCodeLookup('4 Yawkey Way, Boston, MA, 02215-3409, USA', null, false, true, null);
+							Ext.getCmp('my_map').geoCodeLookup('4 Yawkey Way, Boston, MA, 02215-3409, USA', undefined, false, true, undefined);
 							// or you can set it just once
 							// Ext.getCmp('my_map').getMap().setZoom(19);
 						}
