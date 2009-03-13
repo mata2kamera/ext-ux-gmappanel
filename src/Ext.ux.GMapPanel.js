@@ -14,7 +14,22 @@ Ext.namespace('Ext.ux');
 Ext.ux.GMapPanel = Ext.extend(Ext.Panel, {
     /**
     * @cfg {String} gmapType
-    * The type of map to display, options available are: 'map', 'panorama'.
+    * The type of map to display, generic options available are: 'map', 'panorama'. 
+    * More specific maps can be used by specifying the google map type:
+    * 
+    * G_NORMAL_MAP displays the default road map view
+    * G_SATELLITE_MAP displays Google Earth satellite images
+    * G_HYBRID_MAP displays a mixture of normal and satellite views
+    * G_DEFAULT_MAP_TYPES contains an array of the above three types, useful for iterative processing.
+    * G_PHYSICAL_MAP displays a physical map based on terrain information. 
+    * G_MOON_ELEVATION_MAP displays a shaded terrain map of the surface of the Moon, color-coded by altitude.
+    * G_MOON_VISIBLE_MAP displays photographic imagery taken from orbit around the moon.
+    * G_MARS_ELEVATION_MAP displays a shaded terrain map of the surface of Mars, color-coded by altitude.
+    * G_MARS_VISIBLE_MAP displays photographs taken from orbit around Mars.
+    * G_MARS_INFRARED_MAP displays a shaded infrared map of the surface of Mars, where warmer areas appear brighter and colder areas appear darker.
+    * G_SKY_VISIBLE_MAP displays a mosaic of the sky, as seen from Earth, covering the full celestial sphere.
+    * 
+    * These map types can be used within a configuration like this:  { gmapType: G_MOON_VISIBLE_MAP }
     */
     /**
     * @cfg {Object} setCenter
@@ -49,6 +64,7 @@ Ext.ux.GMapPanel = Ext.extend(Ext.Panel, {
     /**
      * @cfg {Boolean} minGeoAccuracy
      * The level (between 1 & 8) to display an accuracy error below. Defaults to seven (7).
+     * see: http://code.google.com/apis/maps/documentation/reference.html#GGeoAddressAccuracy
      */
     /**
      * @cfg {Array} mapConfOpts
@@ -69,7 +85,9 @@ Ext.ux.GMapPanel = Ext.extend(Ext.Panel, {
             gmapType: 'map',
             border: false,
             displayGeoErrors: false,
-			minGeoAccuracy: 7
+			minGeoAccuracy: 7,
+			mapDefined: false,
+			mapDefinedGMap: false
         };
         
         Ext.applyIf(this,defConfig);
@@ -87,13 +105,23 @@ Ext.ux.GMapPanel = Ext.extend(Ext.Panel, {
         
         if (this.gmapType === 'map'){
             this.gmap = new GMap2(this.body.dom);
+			this.mapDefined = true;
+			this.mapDefinedGMap = true;
         }
         
         if (this.gmapType === 'panorama'){
             this.gmap = new GStreetviewPanorama(this.body.dom);
+			this.mapDefined = true;
         }
 
-        if (typeof this.addControl == 'object' && this.gmapType === 'map') {
+		if (!this.mapDefined && this.gmapType){
+			this.gmap = new GMap2(this.body.dom);
+			this.gmap.setMapType(this.gmapType);
+			this.mapDefined = true;
+			this.mapDefinedGMap = true;
+		}
+
+        if (typeof this.addControl == 'object' && this.mapDefinedGMap) {
             this.getMap().addControl(this.addControl);
         }
         
@@ -105,7 +133,7 @@ Ext.ux.GMapPanel = Ext.extend(Ext.Panel, {
                 this.geoCodeLookup(this.setCenter.geoCodeAddr, this.setCenter.marker, false, true, this.setCenter.listeners);
             }else{
                 if (this.gmapType === 'map'){
-                    var point = new GLatLng(this.setCenter.lat,this.setCenter.lng);
+                    var point = this.fixLatLng(new GLatLng(this.setCenter.lat,this.setCenter.lng));
                     this.getMap().setCenter(point, this.zoomLevel);    
                 }
                 if (typeof this.setCenter.marker === 'object' && typeof point === 'object'){
@@ -166,7 +194,7 @@ Ext.ux.GMapPanel = Ext.extend(Ext.Panel, {
      */
     getCenter : function(){
         
-        return this.getMap().getCenter();
+        return this.fixLatLng(this.getMap().getCenter());
         
     },
     /**
@@ -190,7 +218,7 @@ Ext.ux.GMapPanel = Ext.extend(Ext.Panel, {
                 if (typeof markers[i].geoCodeAddr == 'string') {
                     this.geoCodeLookup(markers[i].geoCodeAddr, markers[i].marker, false, markers[i].setCenter, markers[i].listeners);
                 }else{
-                    var mkr_point = new GLatLng(markers[i].lat, markers[i].lng);
+                    var mkr_point = this.fixLatLng(new GLatLng(markers[i].lat, markers[i].lng));
                     this.addMarker(mkr_point, markers[i].marker, false, markers[i].setCenter, markers[i].listeners);
                 }
             }
@@ -320,7 +348,7 @@ Ext.ux.GMapPanel = Ext.extend(Ext.Panel, {
                 if (accuracy < this.minGeoAccuracy) {
                     this.geoErrorMsg('Address Accuracy', 'The address provided has a low accuracy.<br><br>Level '+accuracy+' Accuracy (8 = Exact Match, 1 = Vague Match)');
                 }else{
-                    point = new GLatLng(place.Point.coordinates[1], place.Point.coordinates[0]);
+                    point = this.fixLatLng(new GLatLng(place.Point.coordinates[1], place.Point.coordinates[0]));
                     if (center){
                         this.getMap().setCenter(point, this.zoomLevel);
                     }
@@ -341,8 +369,16 @@ Ext.ux.GMapPanel = Ext.extend(Ext.Panel, {
         if (this.displayGeoErrors) {
             Ext.MessageBox.alert(title,msg);
         }
-    }
- 
+    },
+ 	// private
+	// used to inverse the lat/lng coordinates to correct locations on the sky map
+	fixLatLng : function(llo){
+		if (this.getMap().getCurrentMapType().QO == 'visible'){
+			llo.lat(180 - llo.lat());
+			llo.lng(180 - llo.lng());
+		}
+		return llo;
+	}
 });
 
 Ext.reg('gmappanel',Ext.ux.GMapPanel); 
