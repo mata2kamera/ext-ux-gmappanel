@@ -53,15 +53,19 @@ Ext.onReady(function(){
 						text: '+',
 						minWidth: 30,
 						handler: function(){
-							var m = Ext.getCmp('my_map').getMap();
+							var c = Ext.getCmp('my_map');
+							var m = c.getMap();
 							m.setZoom(m.getZoom()+1);
+							c.zoomLevel = m.getZoom();
 						}
 					},{
 						text: '-',
 						minWidth: 30,
 						handler: function(){
-							var m = Ext.getCmp('my_map').getMap();
+							var c = Ext.getCmp('my_map');
+							var m = c.getMap();
 							m.setZoom(m.getZoom()-1);
+							c.zoomLevel = m.getZoom();
 						}
 					}]
                 }
