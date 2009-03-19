@@ -30,8 +30,8 @@ Ext.onReady(function(){
 			}
 		},{
 			title: 'Boston Museum of Fine Arts',
-            id: 'my_map2',
-            setCenter: {
+			id: 'my_map2',
+			setCenter: {
 				geoCodeAddr: '465 Huntington Avenue, Boston, MA, 02215-5597, USA',
 				marker: {title: 'Boston Museum of Fine Arts'}
             }
