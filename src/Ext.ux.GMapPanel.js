@@ -12,6 +12,38 @@ Ext.namespace('Ext.ux');
  * @param {Object} config The config object
  */
 Ext.ux.GMapPanel = Ext.extend(Ext.Panel, {
+    respErrors: [{
+            code: G_GEO_BAD_REQUEST,
+            msg: 'A directions request could not be successfully parsed. For example, the request may have been rejected if it contained more than the maximum number of waypoints allowed.' 
+        },{
+            code: G_GEO_SERVER_ERROR,
+            msg: 'A geocoding or directions request could not be successfully processed, yet the exact reason for the failure is not known.'
+        },{
+            code: G_GEO_MISSING_QUERY,
+            msg: 'The HTTP q parameter was either missing or had no value. For geocoding requests, this means that an empty address was specified as input. For directions requests, this means that no query was specified in the input.'
+        },{
+            code: G_GEO_MISSING_ADDRESS,
+            msg: 'Synonym for G_GEO_MISSING_QUERY.' 
+        },{
+            code: G_GEO_UNKNOWN_ADDRESS,
+            msg: 'No corresponding geographic location could be found for the specified address. This may be due to the fact that the address is relatively new, or it may be incorrect.' 
+        },{
+            code: G_GEO_UNAVAILABLE_ADDRESS,
+            msg: 'The geocode for the given address or the route for the given directions query cannot be returned due to legal or contractual reasons.' 
+        },{
+            code: G_GEO_UNKNOWN_DIRECTIONS,
+            msg: 'The GDirections object could not compute directions between the points mentioned in the query. This is usually because there is no route available between the two points, or because we do not have data for routing in that region.'
+        },{
+            code: G_GEO_BAD_KEY,
+            msg: 'The given key is either invalid or does not match the domain for which it was given.' 
+        },{
+            code: G_GEO_TOO_MANY_QUERIES,
+            msg: 'The given key has gone over the requests limit in the 24 hour period or has submitted too many requests in too short a period of time. If you\'re sending multiple requests in parallel or in a tight loop, use a timer or pause in your code to make sure you don\'t send the requests too quickly.' 
+    }],
+    respErrorTitle : 'Error',
+    geoErrorMsgUnable : 'Unable to Locate the Address you provided',
+    geoErrorTitle : 'Address Location Error',
+    geoErrorMsgAccuracy : 'The address provided has a low accuracy.<br><br>Level {0} Accuracy (8 = Exact Match, 1 = Vague Match)',
     /**
     * @cfg {String} gmapType
     * The type of map to display, generic options available are: 'map', 'panorama'. 
@@ -337,16 +369,16 @@ Ext.ux.GMapPanel = Ext.extend(Ext.Panel, {
     // private
     addAddressToMap : function(response, addr, marker, clear, center, listeners){
         if (!response || response.Status.code != 200) {
-            Ext.MessageBox.alert('Error', 'Code '+response.Status.code+' Error Returned');
+            this.respErrorMsg(response.Status.code);
         }else{
             place = response.Placemark[0];
             addressinfo = place.AddressDetails;
             accuracy = addressinfo.Accuracy;
             if (accuracy === 0) {
-                this.geoErrorMsg('Unable to Locate Address', 'Unable to Locate the Address you provided');
+                this.geoErrorMsg(this.geoErrorTitle, this.geoErrorMsgUnable);
             }else{
                 if (accuracy < this.minGeoAccuracy) {
-                    this.geoErrorMsg('Address Accuracy', 'The address provided has a low accuracy.<br><br>Level '+accuracy+' Accuracy (8 = Exact Match, 1 = Vague Match)');
+                    this.geoErrorMsg(this.geoErrorTitle, String.format(this.geoErrorMsgAccuracy, accuracy));
                 }else{
                     point = this.fixLatLng(new GLatLng(place.Point.coordinates[1], place.Point.coordinates[0]));
                     if (center){
@@ -369,6 +401,14 @@ Ext.ux.GMapPanel = Ext.extend(Ext.Panel, {
         if (this.displayGeoErrors) {
             Ext.MessageBox.alert(title,msg);
         }
+    },
+    // private
+    respErrorMsg : function(code){
+        Ext.each(this.respErrors, function(obj){
+            if (code == obj.code){
+                Ext.MessageBox.alert(this.respErrorTitle, obj.msg);
+            }
+        }, this);
     },
  	// private
 	// used to inverse the lat/lng coordinates to correct locations on the sky map
