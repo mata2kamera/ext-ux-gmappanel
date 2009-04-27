@@ -1,7 +1,7 @@
 <html>
 <head>
 <meta http-equiv="Content-Type" content="text/html; charset=iso-8859-1">
-    <title>GMap Re-Center Map Example</title>
+    <title>Border Layout (in Viewport) Map Example</title>
     <link rel="stylesheet" type="text/css" href="../../../resources/css/ext-all.css" />
 
     <!-- GC -->
@@ -18,21 +18,26 @@
 
 
     <script src="../../src/Ext.ux.GMapPanel.js"></script>
-    <script src="recenter-map.js"></script>
+    <script src="border-layout.js"></script>
 
     <style type="text/css">
-    .x-panel-body p {
-        margin:10px;
+    .ux-locitem-selector {
+    	width: 100%; 
+		border: 1px solid #99BBE8;
+		margin-bottom: 5px;
         font-size:12px;
+		cursor: pointer;
     }
+	
+	.ux-locitem-selector div {
+		padding:3px;
+	}
+	
+	.ux-locitem-selector-over {
+		border: 1px solid #15428B;
+	}
     </style>
 </head>
 <body>
-
-<h1>GMap Window</h1>
-<p>This example shows how to center the map on different geocoded addresses using buttons or a window/form.</p>
-<input type="button" id="show-btn" value="Gimme a Map" /><br /><br />
-<p>Note that the js is not minified so it is readable. See <a href="../../src/Ext.ux.GMapPanel.js">Ext.ux.GMapPanel.js</a> and <a href="recenter-map.js">recenter-map.js</a> for the full source code.</p>
-
 </body>
 </html>
