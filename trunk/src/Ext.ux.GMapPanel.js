@@ -152,13 +152,8 @@ Ext.ux.GMapPanel = Ext.extend(Ext.Panel, {
 			this.mapDefined = true;
 			this.mapDefinedGMap = true;
 		}
-
-        if (typeof this.addControl == 'object' && this.mapDefinedGMap) {
-            this.getMap().addControl(this.addControl);
-        }
         
-        this.addMapControls();
-        this.addOptions();
+        GEvent.bind(this.getMap(), 'load', this, this.onMapReady);
         
         if (typeof this.setCenter === 'object') {
             if (typeof this.setCenter.geoCodeAddr === 'string'){
@@ -168,8 +163,8 @@ Ext.ux.GMapPanel = Ext.extend(Ext.Panel, {
                     var point = this.fixLatLng(new GLatLng(this.setCenter.lat,this.setCenter.lng));
                     this.getMap().setCenter(point, this.zoomLevel);    
                 }
-                if (typeof this.setCenter.marker === 'object' && typeof point === 'object'){
-                    this.addMarker(point,this.setCenter.marker,this.setCenter.marker.clear);
+                if (typeof this.setCenter.marker === 'object' && typeof point === 'object') {
+                    this.addMarker(point, this.setCenter.marker, this.setCenter.marker.clear);
                 }
             }
             if (this.gmapType === 'panorama'){
@@ -177,13 +172,12 @@ Ext.ux.GMapPanel = Ext.extend(Ext.Panel, {
             }
         }
 
-        GEvent.bind(this.gmap, 'load', this, function(){
-            this.onMapReady();
-        });
-
     },
     // private
     onMapReady : function(){
+        
+        this.addMapControls();
+        this.addOptions();
         
         this.addMarkers(this.markers);
         this.addKMLOverlay(this.autoLoadKML);
