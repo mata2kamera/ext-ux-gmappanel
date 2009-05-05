@@ -13,13 +13,13 @@ Ext.namespace('Ext.ux');
  */
 Ext.ux.GMapPanel = Ext.extend(Ext.Panel, {
     respErrors: [{
-            code: G_GEO_BAD_REQUEST,
+            code: 400, // G_GEO_BAD_REQUEST
             msg: 'A directions request could not be successfully parsed. For example, the request may have been rejected if it contained more than the maximum number of waypoints allowed.' 
         },{
             code: G_GEO_SERVER_ERROR,
             msg: 'A geocoding or directions request could not be successfully processed, yet the exact reason for the failure is not known.'
         },{
-            code: G_GEO_MISSING_QUERY,
+            code: 601, // G_GEO_MISSING_QUERY
             msg: 'The HTTP q parameter was either missing or had no value. For geocoding requests, this means that an empty address was specified as input. For directions requests, this means that no query was specified in the input.'
         },{
             code: G_GEO_MISSING_ADDRESS,
@@ -31,7 +31,7 @@ Ext.ux.GMapPanel = Ext.extend(Ext.Panel, {
             code: G_GEO_UNAVAILABLE_ADDRESS,
             msg: 'The geocode for the given address or the route for the given directions query cannot be returned due to legal or contractual reasons.' 
         },{
-            code: G_GEO_UNKNOWN_DIRECTIONS,
+            code: 604, // G_GEO_UNKNOWN_DIRECTIONS
             msg: 'The GDirections object could not compute directions between the points mentioned in the query. This is usually because there is no route available between the two points, or because we do not have data for routing in that region.'
         },{
             code: G_GEO_BAD_KEY,
@@ -407,10 +407,12 @@ Ext.ux.GMapPanel = Ext.extend(Ext.Panel, {
  	// private
 	// used to inverse the lat/lng coordinates to correct locations on the sky map
 	fixLatLng : function(llo){
-		if (this.getMap().getCurrentMapType().QO == 'visible'){
-			llo.lat(180 - llo.lat());
-			llo.lng(180 - llo.lng());
-		}
+        if (this.getMap().getCurrentMapType()) {
+            if (this.getMap().getCurrentMapType().QO == 'visible') {
+                llo.lat(180 - llo.lat());
+                llo.lng(180 - llo.lng());
+            }
+        }
 		return llo;
 	}
 });
