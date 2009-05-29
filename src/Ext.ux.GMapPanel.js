@@ -3,15 +3,107 @@
  * http://www.vinylfox.com
  */
 
-Ext.namespace('Ext.ux');
+Ext.namespace('Ext.ux.panel');
  
 /**
- * This extension adds Google maps functionality to any panel or panel based component (ie: windows).
- * @class Ext.ux.GMapPanel
+ * @class Ext.ux.panel.GMapPanel
  * @extends Ext.Panel
- * @param {Object} config The config object
+ * <p>A simple component that adds Google maps functionality to any panel or panel based component
+ * (ie: windows).  For information about the Google Maps API see http://code.google.com/apis/maps/index.html.</p>
+ * <p>Sample usage:</p>
+ * <pre><code>
+var panwin = new Ext.Window({
+    layout: 'fit',
+    closeAction: 'hide',
+    title: 'GPanorama Window',
+    width:400,
+    height:300,
+    x: 480,
+    y: 60,
+        items: {
+        xtype: 'gmappanel',
+        gmapType: 'panorama',
+        setCenter: {
+            lat: 42.345573,
+            lng: -71.098326
+        }
+    }
+});
+ * </code></pre>
+ * <p>Another example:</p>
+ * <pre><code>
+var mapwin = new Ext.Window({
+    layout: 'fit',
+    title: 'GMap Window',
+    id: 'my_map',
+    closeAction: 'hide',
+    width: 400,
+    height: 400,
+    x: 40, y: 60,
+    items: {
+        xtype: 'gmappanel',
+        zoomLevel: 14,
+        gmapType: 'map',
+        id: 'my_map',
+        mapConfOpts: ['enableScrollWheelZoom','enableDoubleClickZoom','enableDragging'],
+        mapControls: ['GSmallMapControl','GMapTypeControl','NonExistantControl'],
+        setCenter: {
+            geoCodeAddr: '4 Yawkey Way, Boston, MA, 02215-3409, USA',
+            marker: {title: 'Fenway Park'}
+        },
+        {@link #markers}: [{
+            geoCodeAddr: '465 Huntington Avenue, Boston, MA, 02215-5597, USA',
+            marker: {title: 'Boston Museum of Fine Arts'},
+            listeners: {
+                click: function(e){
+                    Ext.Msg.alert('Its fine', 'and it is art.');
+                }
+            }
+        },{
+            lat: 42.339419,
+            lng: -71.09077,
+            marker: {title: 'Northeastern University'}
+        }]
+    }
+});
+ * </code></pre>
+ * <p>Additional functionality from the Google Maps API may be implemented using <b><code>{@link #getMap}</code></b>.
+ * For example:<pre><code>
+buttons: [{
+    text: '+',
+    minWidth: 30,
+    handler: function(){
+        var c = Ext.getCmp('my_map');
+        var m = c.{@link #getMap}();
+        m.setZoom(m.getZoom()+1);
+        c.zoomLevel = m.getZoom();
+    }
+},{
+    text: '-',
+    minWidth: 30,
+    handler: function(){
+        var c = Ext.getCmp('my_map');
+        var m = c.{@link #getMap}();
+        m.setZoom(m.getZoom()-1);
+        c.zoomLevel = m.getZoom();
+    }
+}]
+ * </code></pre></p>
+ * <p>This class is maintained at http://code.google.com/p/ext-ux-gmappanel/</p> 
+ * <p>For Yahoo maps see: http://developer.yahoo.com/maps/ajax/</p>
+ * @xtype gmappanel
  */
 Ext.ux.GMapPanel = Ext.extend(Ext.Panel, {
+    /**
+     * @cfg {Boolean} border
+     * Defaults to <tt>false</tt>.  See {@link Ext.Panel}.<code>{@link Ext.Panel#border border}</code>.
+     */
+    border: false,
+
+    /**
+     * @cfg {Array} respErrors
+     * An array of msg/code pairs.
+     */
     respErrors: [{
             code: 400, // G_GEO_BAD_REQUEST
             msg: 'A directions request could not be successfully parsed. For example, the request may have been rejected if it contained more than the maximum number of waypoints allowed.' 
@@ -40,90 +132,171 @@ Ext.ux.GMapPanel = Ext.extend(Ext.Panel, {
             code: G_GEO_TOO_MANY_QUERIES,
             msg: 'The given key has gone over the requests limit in the 24 hour period or has submitted too many requests in too short a period of time. If you\'re sending multiple requests in parallel or in a tight loop, use a timer or pause in your code to make sure you don\'t send the requests too quickly.' 
     }],
+    /**
+     * @cfg {String} respErrorTitle
+     * Defaults to <tt>'Error'</tt>.
+     */
     respErrorTitle : 'Error',
+    /**
+     * @cfg {String} geoErrorMsgUnable
+     * Defaults to <tt>'Unable to Locate the Address you provided'</tt>.
+     */
     geoErrorMsgUnable : 'Unable to Locate the Address you provided',
+    /**
+     * @cfg {String} geoErrorTitle
+     * Defaults to <tt>'Address Location Error'</tt>.
+     */
     geoErrorTitle : 'Address Location Error',
+    /**
+     * @cfg {String} geoErrorMsgAccuracy
+     * Defaults to <tt>'The address provided has a low accuracy.<br><br>Level {0} Accuracy (8 = Exact Match, 1 = Vague Match)'</tt>.
+     */
     geoErrorMsgAccuracy : 'The address provided has a low accuracy.<br><br>Level {0} Accuracy (8 = Exact Match, 1 = Vague Match)',
     /**
-    * @cfg {String} gmapType
-    * The type of map to display, generic options available are: 'map', 'panorama'. 
-    * More specific maps can be used by specifying the google map type:
-    * 
-    * G_NORMAL_MAP displays the default road map view
-    * G_SATELLITE_MAP displays Google Earth satellite images
-    * G_HYBRID_MAP displays a mixture of normal and satellite views
-    * G_DEFAULT_MAP_TYPES contains an array of the above three types, useful for iterative processing.
-    * G_PHYSICAL_MAP displays a physical map based on terrain information. 
-    * G_MOON_ELEVATION_MAP displays a shaded terrain map of the surface of the Moon, color-coded by altitude.
-    * G_MOON_VISIBLE_MAP displays photographic imagery taken from orbit around the moon.
-    * G_MARS_ELEVATION_MAP displays a shaded terrain map of the surface of Mars, color-coded by altitude.
-    * G_MARS_VISIBLE_MAP displays photographs taken from orbit around Mars.
-    * G_MARS_INFRARED_MAP displays a shaded infrared map of the surface of Mars, where warmer areas appear brighter and colder areas appear darker.
-    * G_SKY_VISIBLE_MAP displays a mosaic of the sky, as seen from Earth, covering the full celestial sphere.
-    * 
-    * These map types can be used within a configuration like this:  { gmapType: G_MOON_VISIBLE_MAP }
-    */
+     * @cfg {String} gmapType
+     * The type of map to display, generic options available are: 'map', 'panorama'.
+     * Defaults to <tt>'map'</tt>. 
+     * More specific maps can be used by specifying the google map type:
+     * <div class="mdetail-params"><ul>
+     * <li><b><code>G_NORMAL_MAP</code></b> : <div class="sub-desc"><p>
+     * Displays the default road map view
+     * </p></div></li>
+     * <li><b><code>G_SATELLITE_MAP</code></b> : <div class="sub-desc"><p>
+     * Displays Google Earth satellite images
+     * </p></div></li>
+     * <li><b><code>G_HYBRID_MAP</code></b> : <div class="sub-desc"><p>
+     * Displays a mixture of normal and satellite views
+     * </p></div></li>
+     * <li><b><code>G_DEFAULT_MAP_TYPES</code></b> : <div class="sub-desc"><p>
+     * Contains an array of the above three types, useful for iterative processing.
+     * </p></div></li>
+     * <li><b><code>G_PHYSICAL_MAP</code></b> : <div class="sub-desc"><p>
+     * Displays a physical map based on terrain information. 
+     * </p></div></li>
+     * <li><b><code>G_MOON_ELEVATION_MAP</code></b> : <div class="sub-desc"><p>
+     * Displays a shaded terrain map of the surface of the Moon, color-coded by altitude.
+     * </p></div></li>
+     * <li><b><code>G_MOON_VISIBLE_MAP</code></b> : <div class="sub-desc"><p>
+     * Displays photographic imagery taken from orbit around the moon.
+     * </p></div></li>
+     * <li><b><code>G_MARS_ELEVATION_MAP</code></b> : <div class="sub-desc"><p>
+     * Displays a shaded terrain map of the surface of Mars, color-coded by altitude.
+     * </p></div></li>
+     * <li><b><code>G_MARS_VISIBLE_MAP</code></b> : <div class="sub-desc"><p>
+     * Displays photographs taken from orbit around Mars.
+     * </p></div></li>
+     * <li><b><code>G_MARS_INFRARED_MAP</code></b> : <div class="sub-desc"><p>
+     * Displays a shaded infrared map of the surface of Mars, where warmer areas appear brighter and colder areas appear darker.
+     * </p></div></li>
+     * <li><b><code>G_SKY_VISIBLE_MAP</code></b> : <div class="sub-desc"><p>
+     * Displays a mosaic of the sky, as seen from Earth, covering the full celestial sphere.
+     * </p></div></li>
+     * </ul></div>
+     * Sample usage:
+     * <pre><code>
+     * gmapType: G_MOON_VISIBLE_MAP
+     * </code></pre>
+     */
+    gmapType : 'map',
     /**
-    * @cfg {Object} setCenter
-    * A center starting point for the map. The map needs to be centered before it can be used.
-    * The config can contain an address to geocode, and even a marker
-    * \{
-    *   geoCodeAddr: '4 Yawkey Way, Boston, MA, 02215-3409, USA',
-    *   marker: \{title: 'Fenway Park'\}
-    * \}
-    * Or it can simply be a lat/lng. Either way, a marker is not required, all we are really looking for here is a starting center point for the map.
-    * \{
-    *   lat: 42.339641,
-    *   lng: -71.094224
-    * \}
-    */
+     * @cfg {Object} setCenter
+     * The initial center location of the map. The map needs to be centered before it can be used.
+     * A marker is not required to be specified. 
+     * More markers can be added to the map using the <code>{@link #markers}</code> array.
+     * For example:
+     * <pre><code>
+setCenter: {
+    geoCodeAddr: '4 Yawkey Way, Boston, MA, 02215-3409, USA',
+    marker: {title: 'Fenway Park'}
+},
+
+// or just specify lat/long
+setCenter: {
+    lat: 42.345573,
+    lng: -71.098326
+}
+     * </code></pre>
+     */
     /**
      * @cfg {Number} zoomLevel
-     * The zoom level to initialize the map at, generally between 1 (whole planet) and 40 (street). Also used as the zoom level for panoramas, zero specifies no zoom at all.
+     * The zoom level to initialize the map at, generally between 1 (whole planet) and 40 (street).
+     * Also used as the zoom level for panoramas, zero specifies no zoom at all.
+     * Defaults to <tt>3</tt>.
      */
+    zoomLevel: 3,
     /**
      * @cfg {Number} yaw
      * The Yaw, or rotational direction of the users perspective in degrees. Only applies to panoramas.
+     * Defaults to <tt>180</tt>.
      */
+    yaw: 180,
     /**
      * @cfg {Number} pitch
-     * The pitch, or vertical direction of the users perspective in degrees. Default is 0 (zero), straight ahead. Valid values are between +90 (straight up) and -90 (straight down). 
+     * The pitch, or vertical direction of the users perspective in degrees.
+     * Defaults to <tt>0</tt> (straight ahead). Valid values are between +90 (straight up) and -90 (straight down). 
      */
+    pitch: 0,
     /**
      * @cfg {Boolean} displayGeoErrors
      * True to display geocoding errors to the end user via a message box.
+     * Defaults to <tt>false</tt>.
      */
+    displayGeoErrors: false,
     /**
      * @cfg {Boolean} minGeoAccuracy
-     * The level (between 1 & 8) to display an accuracy error below. Defaults to seven (7).
-     * see: http://code.google.com/apis/maps/documentation/reference.html#GGeoAddressAccuracy
+     * The level (between 1 & 8) to display an accuracy error below. Defaults to <tt>7</tt>. For additional information
+     * see <a href="http://code.google.com/apis/maps/documentation/reference.html#GGeoAddressAccuracy">here</a>.
      */
+    minGeoAccuracy: 7,
     /**
      * @cfg {Array} mapConfOpts
-     * Array of strings representing configuration methods to call, a full list can be found here: http://code.google.com/apis/maps/documentation/reference.html#GMap2
+     * Array of strings representing configuration methods to call, a full list can be found
+     * <a href="http://code.google.com/apis/maps/documentation/reference.html#GMap2">here</a>.
+     * For example:
+     * <pre><code>
+     * mapConfOpts: ['enableScrollWheelZoom','enableDoubleClickZoom','enableDragging'],
+     * </code></pre>
      */
     /**
      * @cfg {Array} mapControls
-     * Array of strings representing map controls to initialize, a full list can be found here: http://code.google.com/apis/maps/documentation/reference.html#GControlImpl
+     * Array of strings representing map controls to initialize, a full list can be found
+     * <a href="http://code.google.com/apis/maps/documentation/reference.html#GControlImpl">here</a>.
+     * For example:
+     * <pre><code>
+     * mapControls: ['GSmallMapControl','GMapTypeControl','NonExistantControl']
+     * </code></pre>
+     */
+    /**
+     * @cfg {Array} markers
+     * Markers may be added to the map. Instead of specifying <code>lat</code>/<code>lng</code>,
+     * geocoding can be specified via a <code>geoCodeAddr</code> string.
+     * For example:
+     * <pre><code>
+markers: [{
+    //lat: 42.339641,
+    //lng: -71.094224,
+    // instead of lat/lng:
+    geoCodeAddr: '465 Huntington Avenue, Boston, MA, 02215-5597, USA',
+    marker: {title: 'Boston Museum of Fine Arts'},
+    listeners: {
+        click: function(e){
+            Ext.Msg.alert('Its fine', 'and its art.');
+        }
+    }
+},{
+    lat: 42.339419,
+    lng: -71.09077,
+    marker: {title: 'Northeastern University'}
+}]
+     * </code></pre>
      */
     // private
+    mapDefined: false,
+    // private
+    mapDefinedGMap: false,
+    // private
     initComponent : function(){
-        
-        var defConfig = {
-            plain: true,
-            zoomLevel: 0,
-            yaw: 180,
-            pitch: 0,
-            gmapType: 'map',
-            border: false,
-            displayGeoErrors: false,
-			minGeoAccuracy: 7,
-			mapDefined: false,
-			mapDefinedGMap: false
-        };
-        
-        Ext.applyIf(this,defConfig);
-        
+                
         Ext.ux.GMapPanel.superclass.initComponent.call(this);        
 
     },
@@ -206,7 +379,7 @@ Ext.ux.GMapPanel = Ext.extend(Ext.Panel, {
         
     },
     /**
-     * Returns the current google map
+     * Returns the current google map which can be used to call Google Maps API specific handlers.
      * @return {GMap} this
      */
     getMap : function(){
@@ -234,7 +407,8 @@ Ext.ux.GMapPanel = Ext.extend(Ext.Panel, {
         
     },
     /**
-     * Creates markers from the array that is passed in. Each marker must consist of at least lat and lng properties.
+     * Creates markers from the array that is passed in. Each marker must consist of at least
+     * <code>lat</code> and <code>lng</code> properties or a <code>geoCodeAddr</code>.
      * @param {Array} markers an array of marker objects
      */
     addMarkers : function(markers) {
@@ -345,7 +519,38 @@ Ext.ux.GMapPanel = Ext.extend(Ext.Panel, {
         
     },
     /**
-     * Adds a marker to the map based on an address string (ie: "123 Fake Street, Springfield, NA, 12345, USA") or center the map on the address.
+     * Looks up and address and optionally add a marker, center the map to this location, or
+     * clear other markers. Sample usage:
+     * <pre><code>
+buttons: [
+    {
+        text: 'Fenway Park',
+        handler: function(){
+            var addr = '4 Yawkey Way, Boston, MA, 02215-3409, USA';
+            Ext.getCmp('my_map').geoCodeLookup(addr, undefined, false, true, undefined);
+        }
+    },{
+        text: 'Zoom Fenway Park',
+        handler: function(){
+            Ext.getCmp('my_map').zoomLevel = 19;
+            var addr = '4 Yawkey Way, Boston, MA, 02215-3409, USA';
+            Ext.getCmp('my_map').geoCodeLookup(addr, undefined, false, true, undefined);
+        }
+    },{
+        text: 'Low Accuracy',
+        handler: function(){
+            Ext.getCmp('my_map').geoCodeLookup('Paris, France', undefined, false, true, undefined);
+        }
+    },{
+
+        text: 'Bogus Address',
+        handler: function(){
+            var addr = 'Some Fake, Address, For, Errors';
+            Ext.getCmp('my_map').geoCodeLookup(addr, undefined, false, true, undefined);
+        }
+    }
+]
+     * </code></pre>
      * @param {String} addr the address to lookup.
      * @param {Object} marker the marker to add (optional).
      * @param {Boolean} clear clear other markers before creating this marker
