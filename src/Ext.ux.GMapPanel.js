@@ -296,7 +296,16 @@ markers: [{
     mapDefinedGMap: false,
     // private
     initComponent : function(){
-                
+        
+        this.addEvents(
+            /**
+             * @event mapready
+             * Fires when the map is ready for interaction
+             * @param {GMapPanel} this
+             * @param {GMap} map
+             */
+            'mapready'
+        );
         Ext.ux.GMapPanel.superclass.initComponent.call(this);        
 
     },
@@ -354,6 +363,8 @@ markers: [{
         
         this.addMarkers(this.markers);
         this.addKMLOverlay(this.autoLoadKML);
+        
+        this.fireEvent('mapready', this, this.getMap());
         
     },
     // private
