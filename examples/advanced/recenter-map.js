@@ -135,7 +135,12 @@ Ext.onReady(function(){
 							m.setZoom(m.getZoom()-1);
 							c.zoomLevel = m.getZoom();
 						}
-					}]
+					}],
+                    listeners: {
+                        resize: function(t){
+                            t.geoCodeLookup('4 Yawkey Way, Boston, MA, 02215-3409, USA', undefined, false, true, undefined);
+                        }
+                    }
                 }
             });
             

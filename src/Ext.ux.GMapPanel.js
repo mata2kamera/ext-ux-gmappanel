@@ -370,23 +370,23 @@ markers: [{
     // private
     onResize : function(w, h){
         
+        Ext.ux.GMapPanel.superclass.onResize.call(this, w, h);
+
         // check for the existance of the google map in case the onResize fires too early
         if (typeof this.getMap() == 'object') {
             this.getMap().checkResize();
         }
-        
-        Ext.ux.GMapPanel.superclass.onResize.call(this, w, h);
 
     },
     // private
     setSize : function(width, height, animate){
         
+        Ext.ux.GMapPanel.superclass.setSize.call(this, width, height, animate);
+        
         // check for the existance of the google map in case setSize is called too early
         if (typeof this.getMap() == 'object') {
             this.getMap().checkResize();
         }
-        
-        Ext.ux.GMapPanel.superclass.setSize.call(this, width, height, animate);
         
     },
     /**
