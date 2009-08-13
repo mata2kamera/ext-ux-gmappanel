@@ -1,11 +1,7 @@
-/**
- * @author Shea Frederick
- * http://www.vinylfox.com
- */
-
 Ext.namespace('Ext.ux.panel');
  
 /**
+ * @author Shea Frederick - http://www.vinylfox.com
  * @class Ext.ux.panel.GMapPanel
  * @extends Ext.Panel
  * <p>A simple component that adds Google maps functionality to any panel or panel based component
