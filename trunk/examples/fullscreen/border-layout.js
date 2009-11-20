@@ -29,7 +29,7 @@ Ext.onReady(function(){
 			this.on('click', function(t,i){
 				var map = Ext.getCmp(this.mapTargetCmpId);
 	            var rec = t.store.getAt(i);
-				var point = map.fixLatLng(new GLatLng(rec.data.lat, rec.data.lng));
+				var point = map.fixLatLng(new google.maps.LatLng(rec.data.lat, rec.data.lng));
 				map.getMap().setCenter(point);
 	        }, this);
 			
@@ -50,6 +50,7 @@ Ext.onReady(function(){
 			split: true,
 			layout: 'fit',
 			bodyStyle: 'padding: 5px;',
+            collapsible: true,
 			items: [{
 				xtype: 'locselectionlist',
 				mapTargetCmpId: 'my_map',
