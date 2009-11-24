@@ -478,7 +478,7 @@ markers: [{
     },
     /**
      * Adds a GMap control to the map.
-     * @param {String} mc a string representation of the control to be instantiated.
+     * @param {String/Object} mc a string representation of the control to be instantiated or an already instantiated control.
      */
     addMapControl : function(mc){
         
