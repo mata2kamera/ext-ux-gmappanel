@@ -482,10 +482,14 @@ markers: [{
      */
     addMapControl : function(mc){
         
-        var mcf = window[mc];
-        if (typeof mcf === 'function') {
-            this.getMap().addControl(new mcf());
-        }    
+        if (Ext.isObject(mc)) {
+            this.getMap().addControl(mc);
+        } else {
+            var mcf = window[mc];
+            if (typeof mcf === 'function') {
+                this.getMap().addControl(new mcf());
+            }
+        }
         
     },
     // private

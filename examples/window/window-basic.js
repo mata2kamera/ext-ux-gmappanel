@@ -25,7 +25,7 @@ Ext.onReady(function(){
                     gmapType: 'map',
                     id: 'my_map',
                     mapConfOpts: ['enableScrollWheelZoom','enableDoubleClickZoom','enableDragging'],
-                    mapControls: ['GSmallMapControl','GMapTypeControl','NonExistantControl'],
+                    mapControls: [new GSmallMapControl(),'GMapTypeControl','NonExistantControl'],
                     setCenter: {
                         geoCodeAddr: '4 Yawkey Way, Boston, MA, 02215-3409, USA',
                         marker: {title: 'Fenway Park'}
