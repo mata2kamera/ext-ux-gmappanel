@@ -352,7 +352,7 @@ markers: [{
             this.clearMarkers();
         }
         if (center === true) {
-            this.getMap().set_center(point, this.zoomLevel);
+            this.getMap().setCenter(point, this.zoomLevel);
         }
 
         var mark = new google.maps.Marker(Ext.apply(marker, {
@@ -497,7 +497,7 @@ buttons: [
 	centerOnClientLocation : function(){
 		this.getClientLocation(function(loc){
 			var point = this.fixLatLng(new google.maps.LatLng(loc.latitude,loc.longitude));
-            this.getMap().set_center(point, this.zoomLevel);
+            this.getMap().setCenter(point, this.zoomLevel);
 		});
 	},
 	// private
@@ -525,7 +525,7 @@ buttons: [
                 }else{
                     point = this.fixLatLng(new google.maps.LatLng(place.af, place.cf));
                     if (center){
-                        this.getMap().set_center(point, this.zoomLevel);
+                        this.getMap().setCenter(point, this.zoomLevel);
                     }
                     if (typeof marker === 'object') {
                         if (!marker.title){
